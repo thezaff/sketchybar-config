@@ -121,19 +121,19 @@ update_workspace_item() {
         sketchybar --add item "$item_name" left \
                    --set "$item_name" \
                          icon="$workspace" \
-                         icon.font="JetbrainsMono Nerd Font Mono:Bold:13.0" \
+                         icon.font="JetbrainsMono Nerd Font Mono:Bold:12.0" \
                          icon.color="$text_color" \
-                         icon.padding_left=6 \
-                         icon.padding_right=6 \
+                         icon.padding_left=8 \
+                         icon.padding_right=8 \
                          label.drawing=off \
                          background.color="$background_color" \
-                         background.corner_radius=6 \
-                         background.height=26 \
+                         background.corner_radius=5 \
+                         background.height=24 \
                          background.border_width=1 \
                          background.border_color="$border_color" \
                          background.drawing=on \
-                         padding_left=8 \
-                         padding_right=8 \
+                         padding_left=6 \
+                         padding_right=6 \
                          click_script="aerospace workspace $workspace" \
                    --subscribe "$item_name" aerospace_workspace_change
     else
