@@ -1,65 +1,60 @@
 #!/bin/bash
 
-# Enhanced AeroSpace workspace management for SketchyBar
-# Handles dynamic workspace creation/removal with monitor-specific colors
-# Called by AeroSpace on workspace changes
-
-# Source colors from the main color scheme
+# AeroSpace workspace management for SketchyBar
 if [[ -z "$CONFIG_DIR" ]]; then
     CONFIG_DIR="$HOME/.config/sketchybar"
 fi
 source "$CONFIG_DIR/colors.sh"
 
-# Monitor-specific color functions with sophisticated color scheme
 get_monitor_accent_color() {
     local monitor="$1"
     case "$monitor" in
-        "1"|"main") echo "$ACCENT_PRIMARY" ;;      # Ultra Rich Blue for main monitor
-        "2"|"secondary") echo "$ACCENT_SECONDARY" ;; # Ultra Rich Green for secondary monitor
-        "3") echo "$ACCENT_TERTIARY" ;;            # Ultra Rich Orange for third monitor
-        "4") echo "$ACCENT_QUATERNARY" ;;          # Ultra Rich Purple for fourth monitor
-        *) echo "$ACCENT_PRIMARY" ;;               # Default to blue
+        "1"|"main") echo "$ACCENT_PRIMARY" ;;
+        "2"|"secondary") echo "$ACCENT_SECONDARY" ;;
+        "3") echo "$ACCENT_TERTIARY" ;;
+        "4") echo "$ACCENT_QUATERNARY" ;;
+        *) echo "$ACCENT_PRIMARY" ;;
     esac
 }
 
 get_monitor_background_focused() {
     local monitor="$1"
     local accent_color=$(get_monitor_accent_color "$monitor")
-    # Create bright background by reducing alpha to 40 for focused state
+
     echo "${accent_color/0xff/0x40}"
 }
 
 get_monitor_background_unfocused() {
     local monitor="$1"
     local accent_color=$(get_monitor_accent_color "$monitor")
-    # Create very dimmed background by reducing alpha to 15 for unfocused state
+
     echo "${accent_color/0xff/0x15}"
 }
 
 get_monitor_border_focused() {
     local monitor="$1"
     local accent_color=$(get_monitor_accent_color "$monitor")
-    # Create bright border by reducing alpha to 80 for focused state
+
     echo "${accent_color/0xff/0x80}"
 }
 
 get_monitor_border_unfocused() {
     local monitor="$1"
     local accent_color=$(get_monitor_accent_color "$monitor")
-    # Create very dimmed border by reducing alpha to 25 for unfocused state
+
     echo "${accent_color/0xff/0x25}"
 }
 
 get_monitor_text_focused() {
     local monitor="$1"
-    # Return full accent color for focused text
+
     get_monitor_accent_color "$monitor"
 }
 
 get_monitor_text_unfocused() {
     local monitor="$1"
     local accent_color=$(get_monitor_accent_color "$monitor")
-    # Create dimmed text by reducing alpha to 70 for unfocused state
+
     echo "${accent_color/0xff/0x70}"
 }
 
@@ -117,7 +112,7 @@ update_workspace_item() {
     local item_exists=$(sketchybar --query "$item_name" 2>/dev/null)
     
     if [[ -z "$item_exists" ]]; then
-        # Create new workspace item with sophisticated color scheme
+
         sketchybar --add item "$item_name" left \
                    --set "$item_name" \
                          icon="$workspace" \
@@ -137,10 +132,10 @@ update_workspace_item() {
                          click_script="aerospace workspace $workspace" \
                    --subscribe "$item_name" aerospace_workspace_change
         
-        # Position the workspace item after the separator
+
         sketchybar --move "$item_name" after separator
     else
-        # Update existing workspace item with new colors
+
         sketchybar --set "$item_name" \
                          icon.color="$text_color" \
                          background.color="$background_color" \

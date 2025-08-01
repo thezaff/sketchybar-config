@@ -1,7 +1,6 @@
 #!/bin/bash
 
-# Modern aesthetic sketchybar configuration with aerospace integration
-# Colors and icons are defined in separate files for better organization
+# SketchyBar configuration with aerospace integration
 
 source "$CONFIG_DIR/colors.sh"
 source "$CONFIG_DIR/icons.sh"
@@ -53,7 +52,7 @@ sketchybar --add item apple.logo left \
            --set apple.logo icon=$APPLE \
                            icon.font="SF Pro:Black:16.0" \
                            icon.color=$ACCENT_SECONDARY \
-                           padding_right=12 \
+                           padding_right=4 \
                            padding_left=4 \
                            label.drawing=off \
                            click_script="$PLUGIN_DIR/apple.sh"
@@ -63,15 +62,12 @@ sketchybar --add item separator left \
            --set separator icon="󰇙" \
                           icon.font="SF Pro:Regular:16.0" \
                           icon.color=$ACCENT_TERTIARY \
-                          padding_left=8 \
+                          padding_left=4 \
                           padding_right=8 \
                           label.drawing=off
 
-# Enhanced Dynamic Aerospace Workspaces  
+# Dynamic Aerospace Workspaces
 sketchybar --add event aerospace_workspace_change
-
-# Initialize workspaces (this will be called by the aerospace_workspace_update.sh script)
-# No static workspace items needed - they are created dynamically
 
 # Front App
 sketchybar --add item front_app left \
@@ -126,24 +122,6 @@ sketchybar --add item battery right \
                         padding_left=4 \
                         padding_right=4 \
             --subscribe battery system_woke power_source_change
-
-
-# Calendar Events
-# sketchybar --add item calendar right \
-#            --set calendar icon.font="SF Pro:Semibold:12.0" \
-#                           icon.padding_left=8 \
-#                           icon.padding_right=6 \
-#                           label.font="SF Pro:Medium:10.0" \
-#                           label.padding_left=4 \
-#                           label.padding_right=8 \
-#                           label.max_chars=25 \
-#                           update_freq=300 \
-#                           script="$PLUGIN_DIR/calendar.sh" \
-#                           background.color=$BACKGROUND_1 \
-#                           background.drawing=on \
-#                           background.height=26 \
-#                           padding_left=4 \
-#                           padding_right=4
 
 # Input Source
 sketchybar --add item input_source right \
