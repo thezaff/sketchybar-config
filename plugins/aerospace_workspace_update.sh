@@ -132,13 +132,13 @@ update_workspace_item() {
                          background.border_width=1 \
                          background.border_color="$border_color" \
                          background.drawing=on \
-                         padding_left=6 \
-                         padding_right=6 \
+                         padding_left=4 \
+                         padding_right=4 \
                          click_script="aerospace workspace $workspace" \
                    --subscribe "$item_name" aerospace_workspace_change
         
-        # Position the workspace item after the apple logo (before separator)
-        sketchybar --move "$item_name" after apple.logo
+        # Position the workspace item after the separator
+        sketchybar --move "$item_name" after separator
     else
         # Update existing workspace item with new colors
         sketchybar --set "$item_name" \
