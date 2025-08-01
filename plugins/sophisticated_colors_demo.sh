@@ -13,7 +13,7 @@ source "$CONFIG_DIR/colors.sh"
 
 echo ""
 echo "🌟 New Sophisticated Color System:"
-echo "   Text/Labels:    Full accent colors (bright & vibrant)"
+echo "   Text/Labels:    Full accent colors for focused, dimmed for unfocused"
 echo "   Backgrounds:    Dimmed accent colors (subtle & elegant)"
 echo "   Borders:        Medium accent colors (defined but not overwhelming)"
 echo ""
@@ -25,9 +25,9 @@ echo "     • Background: 25% accent color (bright but subtle)"
 echo "     • Border:     50% accent color (visible definition)"
 echo ""
 echo "   UNFOCUSED state:"
-echo "     • Text:       100% accent color (maintains readability)"
-echo "     • Background: 12% accent color (very subtle)"
-echo "     • Border:     25% accent color (gentle definition)"
+echo "     • Text:       70% accent color (dimmed but readable)"
+echo "     • Background: 8% accent color (very subtle & dimmed)"
+echo "     • Border:     15% accent color (gentle definition)"
 echo ""
 
 echo "🖥️  Monitor-Specific Color Mapping:"
@@ -69,18 +69,26 @@ sketchybar --query bar | jq -r '.items[]' | grep '^aerospace\.' | while read ite
         
         if [[ "$is_focused" == "true" ]]; then
             focus_indicator="🔥 FOCUSED"
+            text_alpha="100%"
             bg_alpha="25%"
             border_alpha="50%"
         else
             focus_indicator="  unfocused"
-            bg_alpha="12%"
-            border_alpha="25%"
+            text_alpha="70%"
+            bg_alpha="8%"
+            border_alpha="15%"
         fi
         
         printf "  %s Workspace %s → Monitor %s:\n" "$focus_indicator" "$ws" "$monitor_id"
-        printf "    Text:       %s (%s - 100%% alpha)\n" "$accent" "$color_name"
-        printf "    Background: %s (%s - %s alpha)\n" "${accent/0xff/0x40}" "$color_name" "$bg_alpha"
-        printf "    Border:     %s (%s - %s alpha)\n" "${accent/0xff/0x80}" "$color_name" "$border_alpha"
+        if [[ "$is_focused" == "true" ]]; then
+            printf "    Text:       %s (%s - %s alpha)\n" "$accent" "$color_name" "$text_alpha"
+            printf "    Background: %s (%s - %s alpha)\n" "${accent/0xff/0x40}" "$color_name" "$bg_alpha"
+            printf "    Border:     %s (%s - %s alpha)\n" "${accent/0xff/0x80}" "$color_name" "$border_alpha"
+        else
+            printf "    Text:       %s (%s - %s alpha)\n" "${accent/0xff/0x70}" "$color_name" "$text_alpha"
+            printf "    Background: %s (%s - %s alpha)\n" "${accent/0xff/0x15}" "$color_name" "$bg_alpha"
+            printf "    Border:     %s (%s - %s alpha)\n" "${accent/0xff/0x25}" "$color_name" "$border_alpha"
+        fi
         echo ""
     fi
 done

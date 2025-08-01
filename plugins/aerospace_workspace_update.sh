@@ -32,8 +32,8 @@ get_monitor_background_focused() {
 get_monitor_background_unfocused() {
     local monitor="$1"
     local accent_color=$(get_monitor_accent_color "$monitor")
-    # Create dimmed background by reducing alpha to 20 for unfocused state
-    echo "${accent_color/0xff/0x20}"
+    # Create very dimmed background by reducing alpha to 15 for unfocused state
+    echo "${accent_color/0xff/0x15}"
 }
 
 get_monitor_border_focused() {
@@ -46,8 +46,21 @@ get_monitor_border_focused() {
 get_monitor_border_unfocused() {
     local monitor="$1"
     local accent_color=$(get_monitor_accent_color "$monitor")
-    # Create dimmed border by reducing alpha to 40 for unfocused state
-    echo "${accent_color/0xff/0x40}"
+    # Create very dimmed border by reducing alpha to 25 for unfocused state
+    echo "${accent_color/0xff/0x25}"
+}
+
+get_monitor_text_focused() {
+    local monitor="$1"
+    # Return full accent color for focused text
+    get_monitor_accent_color "$monitor"
+}
+
+get_monitor_text_unfocused() {
+    local monitor="$1"
+    local accent_color=$(get_monitor_accent_color "$monitor")
+    # Create dimmed text by reducing alpha to 70 for unfocused state
+    echo "${accent_color/0xff/0x70}"
 }
 
 # Get current workspace and monitor information
@@ -67,23 +80,23 @@ get_monitor_colors() {
         monitor_id=$(echo "$monitor_info" | cut -d'|' -f2)
     fi
     
-    # Get accent color for text
-    local accent_color=$(get_monitor_accent_color "$monitor_id")
-    
-    # Get background and border colors based on focus state
+    # Get colors based on focus state
+    local text_color
     local background_color
     local border_color
     
     if [[ "$is_focused" == "true" ]]; then
+        text_color=$(get_monitor_text_focused "$monitor_id")
         background_color=$(get_monitor_background_focused "$monitor_id")
         border_color=$(get_monitor_border_focused "$monitor_id")
     else
+        text_color=$(get_monitor_text_unfocused "$monitor_id")
         background_color=$(get_monitor_background_unfocused "$monitor_id")
         border_color=$(get_monitor_border_unfocused "$monitor_id")
     fi
     
-    # Return colors as space-separated string: accent background border
-    echo "$accent_color $background_color $border_color"
+    # Return colors as space-separated string: text background border
+    echo "$text_color $background_color $border_color"
 }
 
 
@@ -96,7 +109,7 @@ update_workspace_item() {
     
     # Get the sophisticated color scheme
     local colors=$(get_monitor_colors "$workspace" "$is_focused")
-    local accent_color=$(echo "$colors" | cut -d' ' -f1)
+    local text_color=$(echo "$colors" | cut -d' ' -f1)
     local background_color=$(echo "$colors" | cut -d' ' -f2)
     local border_color=$(echo "$colors" | cut -d' ' -f3)
     
@@ -109,7 +122,7 @@ update_workspace_item() {
                    --set "$item_name" \
                          icon="$workspace" \
                          icon.font="JetbrainsMono Nerd Font Mono:Bold:13.0" \
-                         icon.color="$accent_color" \
+                         icon.color="$text_color" \
                          icon.padding_left=6 \
                          icon.padding_right=6 \
                          label.drawing=off \
@@ -126,7 +139,7 @@ update_workspace_item() {
     else
         # Update existing workspace item with new colors
         sketchybar --set "$item_name" \
-                         icon.color="$accent_color" \
+                         icon.color="$text_color" \
                          background.color="$background_color" \
                          background.border_color="$border_color" \
                          icon="$workspace"
