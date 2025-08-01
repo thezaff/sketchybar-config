@@ -58,51 +58,14 @@ sketchybar --add item apple.logo left \
                            label.drawing=off \
                            click_script="$PLUGIN_DIR/apple.sh"
 
-# Aerospace Display-Aware Workspaces
+# Dynamic Aerospace Workspaces
 sketchybar --add event aerospace_workspace_change
 
-# Monitor 1 Workspace Indicator (Primary - Built-in Display)
-sketchybar --add item monitor_1_workspace left \
-           --subscribe monitor_1_workspace aerospace_workspace_change \
-           --set monitor_1_workspace \
-                 icon="M1:4" \
-                 icon.font="SF Pro:Medium:12.0" \
-                 icon.color=$GREY \
-                 icon.padding_left=8 \
-                 icon.padding_right=8 \
-                 label.drawing=off \
-                 padding_left=4 \
-                 padding_right=4 \
-                 background.color=$BACKGROUND_1 \
-                 background.corner_radius=6 \
-                 background.height=26 \
-                 background.drawing=on \
-                 script="$PLUGIN_DIR/aerospace_display.sh"
-
-# Monitor 2 Workspace Indicator (External - MAG 274UPF E2)
-sketchybar --add item monitor_2_workspace left \
-           --subscribe monitor_2_workspace aerospace_workspace_change \
-           --set monitor_2_workspace \
-                 icon="M2:1" \
-                 icon.font="SF Pro:Medium:12.0" \
-                 icon.color=$GREY \
-                 icon.padding_left=8 \
-                 icon.padding_right=8 \
-                 label.drawing=off \
-                 padding_left=4 \
-                 padding_right=4 \
-                 background.color=$BACKGROUND_1 \
-                 background.corner_radius=6 \
-                 background.height=26 \
-                 background.drawing=on \
-                 script="$PLUGIN_DIR/aerospace_display.sh"
-
-# Monitor Connection Watcher (detects when monitors are connected/disconnected)
-sketchybar --add item monitor_watcher left \
-           --set monitor_watcher \
+# Initialize all non-empty workspaces dynamically
+sketchybar --add item aerospace_workspace_init left \
+           --set aerospace_workspace_init \
                  drawing=off \
-                 update_freq=5 \
-                 script="$PLUGIN_DIR/monitor_watcher.sh"
+                 script="$PLUGIN_DIR/aerospace_workspaces.sh"
 
 # Separator
 sketchybar --add item separator left \
