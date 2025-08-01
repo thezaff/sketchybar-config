@@ -1,0 +1,77 @@
+--- Script Start: Fri Aug  1 18:51:40 +05 2025 ---
+Sourced colors.sh
+Fetching data...
+FOCUSED_WORKSPACE: 6
+MONITOR_DATA: json
+json
+WORKSPACE_DATA: json
+json
+json
+json
+json
+json
+json
+json
+json
+json
+json
+json
+json
+json
+json
+json
+json
+json
+json
+json
+json
+json
+json
+json
+json
+json
+json
+json
+json
+json
+json
+json
+json
+SKETCHYBAR_BAR_QUERY: {
+	"position": "top",
+	"topmost": "on",
+	"sticky": "on",
+	"hidden": "off",
+	"shadow": "off",
+	"font_smoothing": "off",
+	"show_in_fullscreen": "off",
+	"blur_radius": 0,
+	"margin": 0,
+	"drawing": "on",
+	"color": "0x0",
+	"border_color": "0xffff0000",
+	"border_width": 0,
+	"height": 42,
+	"corner_radius": 0,
+	"padding_left": 16,
+	"padding_right": 16,
+	"y_offset": 0,
+	"clip": 0.000000,
+	"image": {
+		"value": "(null)",
+		"drawing": "off",
+		"scale": 1.000000
+	},
+	"items": [
+		 "apple.logo",
+		 "aerospace_updates",
+		 "separator",
+		 "front_app",
+		 "clock",
+		 "battery",
+		 "now_playing",
+		 "wifi",
+		 "bluetooth",
+		 "volume"
+	]
+}

@@ -1,63 +1,199 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
-# Source colors for consistent theming
+# Enhanced AeroSpace workspace management for SketchyBar
+# Handles dynamic workspace creation/removal with monitor-specific colors
+# Called by AeroSpace on workspace changes
+
+# Source colors from the main color scheme
+if [[ -z "$CONFIG_DIR" ]]; then
+    CONFIG_DIR="$HOME/.config/sketchybar"
+fi
 source "$CONFIG_DIR/colors.sh"
 
-WORKSPACE_ID="$1"
-FOCUSED_WORKSPACE=$(aerospace list-workspaces --focused)
-
-# Get workspaces for each monitor to determine colors
-MONITOR_1_WORKSPACES=$(aerospace list-workspaces --monitor 1 --empty no 2>/dev/null || echo "")
-MONITOR_2_WORKSPACES=$(aerospace list-workspaces --monitor 2 --empty no 2>/dev/null || echo "")
-
-# Function to determine which monitor a workspace belongs to
-get_workspace_monitor() {
-    local workspace="$1"
-    
-    # Check if workspace is on monitor 1
-    for ws in $MONITOR_1_WORKSPACES; do
-        if [ "$ws" = "$workspace" ]; then
-            echo "1"
-            return
-        fi
-    done
-    
-    # Check if workspace is on monitor 2
-    for ws in $MONITOR_2_WORKSPACES; do
-        if [ "$ws" = "$workspace" ]; then
-            echo "2"
-            return
-        fi
-    done
-    
-    echo "unknown"
-}
-
-# Function to get monitor color
-get_monitor_color() {
+# Monitor-specific color functions using the rich color scheme
+get_monitor_color_focused() {
     local monitor="$1"
     case "$monitor" in
-        "1") echo "$ACCENT_PRIMARY" ;;    # External monitor - Blue
-        "2") echo "$ACCENT_SECONDARY" ;;  # Built-in monitor - Green
-        *) echo "$GREY" ;;               # Fallback
+        "1"|"main") echo "$ACCENT_PRIMARY" ;;      # Ultra Rich Blue for main monitor
+        "2"|"secondary") echo "$ACCENT_SECONDARY" ;; # Ultra Rich Green for secondary monitor
+        "3") echo "$ACCENT_TERTIARY" ;;            # Ultra Rich Orange for third monitor
+        "4") echo "$ACCENT_QUATERNARY" ;;          # Ultra Rich Purple for fourth monitor
+        *) echo "$ACCENT_PRIMARY" ;;               # Default to blue
     esac
 }
 
-# Determine monitor and color for this workspace
-MONITOR=$(get_workspace_monitor "$WORKSPACE_ID")
-MONITOR_COLOR=$(get_monitor_color "$MONITOR")
+get_monitor_color_unfocused() {
+    local monitor="$1"
+    local focused_color=$(get_monitor_color_focused "$monitor")
+    # Convert focused color to unfocused by changing alpha from ff to 55
+    echo "${focused_color/0xff/0x55}"
+}
 
-# Update styling based on focus state
-if [ "$WORKSPACE_ID" = "$FOCUSED_WORKSPACE" ]; then
-    # Focused workspace - white text on darker background
-    sketchybar --set "$NAME" \
-               icon.color=$WHITE \
-               icon.font="SF Pro:Semibold:12.0" \
-               background.color=$BACKGROUND_2
-else
-    # Non-focused workspace - monitor color on lighter background
-    sketchybar --set "$NAME" \
-               icon.color=$MONITOR_COLOR \
-               icon.font="SF Pro:Medium:12.0" \
-               background.color=$BACKGROUND_1
-fi
+# Get current workspace and monitor information
+FOCUSED_WORKSPACE="$AEROSPACE_FOCUSED_WORKSPACE"
+PREV_WORKSPACE="$AEROSPACE_PREV_WORKSPACE"
+
+# Function to get monitor-specific color
+get_monitor_color() {
+    local workspace="$1"
+    local is_focused="$2"
+    
+    # Get monitor info for this workspace using aerospace
+    local monitor_info=$(aerospace list-workspaces --all --format '%{workspace}|%{monitor-id}|%{monitor-name}' | grep "^${workspace}|")
+    
+    if [[ -z "$monitor_info" ]]; then
+        # Fallback color if we can't determine monitor
+        if [[ "$is_focused" == "true" ]]; then
+            echo "0xff007acc"
+        else
+            echo "0x55666666"
+        fi
+        return
+    fi
+    
+    local monitor_id=$(echo "$monitor_info" | cut -d'|' -f2)
+    local monitor_name=$(echo "$monitor_info" | cut -d'|' -f3 | tr '[:upper:]' '[:lower:]')
+    
+    # Determine color based on monitor and focus state
+    if [[ "$is_focused" == "true" ]]; then
+        # Try monitor ID first, then name
+        get_monitor_color_focused "$monitor_id"
+    else
+        get_monitor_color_unfocused "$monitor_id"
+    fi
+}
+
+
+# Function to create or update a workspace item
+update_workspace_item() {
+    local workspace="$1"
+    local is_focused="$2"
+    
+    local item_name="aerospace.${workspace}"
+    local color=$(get_monitor_color "$workspace" "$is_focused")
+    
+    # Set icon color based on focus state for better contrast
+    local icon_color="$WHITE"
+    if [[ "$is_focused" == "true" ]]; then
+        icon_color="$WHITE"  # Bright white for focused
+    else
+        icon_color="$LIGHT_GREY"  # Slightly dimmed for unfocused
+    fi
+    
+    # Check if item exists
+    local item_exists=$(sketchybar --query "$item_name" 2>/dev/null)
+    
+    if [[ -z "$item_exists" ]]; then
+        # Create new workspace item with refined styling
+        sketchybar --add item "$item_name" left \
+                   --set "$item_name" \
+                         icon="$workspace" \
+                         icon.font="SF Pro:Bold:12.0" \
+                         icon.color="$icon_color" \
+                         icon.padding_left=6 \
+                         icon.padding_right=6 \
+                         label.drawing=off \
+                         background.color="$color" \
+                         background.corner_radius=8 \
+                         background.height=22 \
+                         background.border_width=1 \
+                         background.border_color="$BACKGROUND_2" \
+                         background.drawing=on \
+                         padding_left=3 \
+                         padding_right=3 \
+                         click_script="aerospace workspace $workspace" \
+                   --subscribe "$item_name" aerospace_workspace_change
+    else
+        # Update existing workspace item
+        sketchybar --set "$item_name" \
+                         background.color="$color" \
+                         icon.color="$icon_color" \
+                         icon="$workspace"
+    fi
+}
+
+# Function to remove workspace item
+remove_workspace_item() {
+    local workspace="$1"
+    local item_name="aerospace.${workspace}"
+    
+    # Check if item exists before trying to remove
+    local item_exists=$(sketchybar --query "$item_name" 2>/dev/null)
+    if [[ -n "$item_exists" ]]; then
+        sketchybar --remove "$item_name"
+    fi
+}
+
+# Main update logic
+update_workspaces() {
+    # Get all currently existing workspace items
+    local existing_items=$(sketchybar --query bar | jq -r '.items[] | select(startswith("aerospace.")) | .')
+    
+    # Get workspaces that should be displayed:
+    # 1. Always include focused workspace (even if empty)
+    # 2. Include all non-empty workspaces
+    local workspaces_to_display=()
+    
+    # Add focused workspace (even if empty)
+    if [[ -n "$FOCUSED_WORKSPACE" ]]; then
+        workspaces_to_display+=("$FOCUSED_WORKSPACE")
+    fi
+    
+    # Add all non-empty workspaces
+    local non_empty_workspaces=$(aerospace list-workspaces --monitor all --empty no --format '%{workspace}')
+    while IFS= read -r workspace; do
+        if [[ -n "$workspace" ]]; then
+            # Add to list if not already included (avoid duplicates)
+            local already_included=false
+            for existing_ws in "${workspaces_to_display[@]}"; do
+                if [[ "$existing_ws" == "$workspace" ]]; then
+                    already_included=true
+                    break
+                fi
+            done
+            if [[ "$already_included" == "false" ]]; then
+                workspaces_to_display+=("$workspace")
+            fi
+        fi
+    done <<< "$non_empty_workspaces"
+    
+    # Update or create items for workspaces that should be displayed
+    for workspace in "${workspaces_to_display[@]}"; do
+        local is_focused="false"
+        if [[ "$workspace" == "$FOCUSED_WORKSPACE" ]]; then
+            is_focused="true"
+        fi
+        update_workspace_item "$workspace" "$is_focused"
+    done
+    
+    # Remove items for workspaces that should not be displayed
+    if [[ -n "$existing_items" ]]; then
+        while IFS= read -r item; do
+            if [[ -n "$item" ]]; then
+                local workspace=${item#aerospace.}
+                
+                # Check if this workspace should be displayed
+                local should_keep=false
+                for display_ws in "${workspaces_to_display[@]}"; do
+                    if [[ "$display_ws" == "$workspace" ]]; then
+                        should_keep=true
+                        break
+                    fi
+                done
+                
+                # Remove if not in the display list
+                if [[ "$should_keep" == "false" ]]; then
+                    remove_workspace_item "$workspace"
+                fi
+            fi
+        done <<< "$existing_items"
+    fi
+}
+
+# Trigger the update
+update_workspaces
+
+# Trigger sketchybar event for any scripts that need to respond
+sketchybar --trigger aerospace_workspace_change \
+           FOCUSED_WORKSPACE="$FOCUSED_WORKSPACE" \
+           PREV_WORKSPACE="$PREV_WORKSPACE"

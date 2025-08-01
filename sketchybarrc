@@ -58,28 +58,11 @@ sketchybar --add item apple.logo left \
                            label.drawing=off \
                            click_script="$PLUGIN_DIR/apple.sh"
 
-# Dynamic Aerospace Workspaces
+# Enhanced Dynamic Aerospace Workspaces  
 sketchybar --add event aerospace_workspace_change
-sketchybar --add event aerospace_refresh_workspaces
 
-# Initialize all non-empty workspaces dynamically  
-sketchybar --add item aerospace_workspace_init left \
-           --set aerospace_workspace_init \
-                 drawing=off \
-                 script="$PLUGIN_DIR/aerospace.sh" \
-           --subscribe aerospace_workspace_init aerospace_refresh_workspaces
-
-# Trigger initial workspace setup (run after a brief delay)
-sketchybar --add item workspace_trigger left \
-           --set workspace_trigger script="$PLUGIN_DIR/aerospace.sh" \
-                                   drawing=off \
-           --subscribe workspace_trigger aerospace_refresh_workspaces
-
-# Periodic workspace sync to catch missed changes
-sketchybar --add item workspace_sync left \
-           --set workspace_sync script="$PLUGIN_DIR/workspace_sync.sh" \
-                                drawing=off \
-                                update_freq=1
+# Initialize workspaces (this will be called by the aerospace_workspace_update.sh script)
+# No static workspace items needed - they are created dynamically
 
 # Separator
 sketchybar --add item separator left \
@@ -264,5 +247,5 @@ sketchybar --add item volume right \
 ##### Finalize Setup #####
 sketchybar --update
 
-# Initialize workspaces after everything is set up
+# Initialize workspaces dynamically after everything is set up
 "$CONFIG_DIR/plugins/init_workspaces.sh" &
