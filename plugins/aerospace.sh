@@ -16,6 +16,16 @@ case "$SENDER" in
             FOCUSED_WORKSPACE=$(aerospace list-workspaces --focused)
         fi
         
+        # Always check if we need to refresh workspace list (new workspace became non-empty)
+        CURRENT_WORKSPACES=$(aerospace list-workspaces --monitor all --empty no | sort | tr '\n' ' ')
+        EXISTING_ITEMS=$(sketchybar --query bar | grep -o '"workspace\.[^"]*"' | sed 's/"//g' | sed 's/workspace\.//' | sort | tr '\n' ' ')
+        
+        if [ "$CURRENT_WORKSPACES" != "$EXISTING_ITEMS" ]; then
+            # Workspace list changed, trigger full refresh and return
+            SENDER="aerospace_refresh_workspaces" exec "$0"
+            return
+        fi
+        
         # Update all workspace items
         for item in $(sketchybar --query bar | grep -o '"workspace\.[^"]*"' | sed 's/"//g'); do
             workspace_id="${item#workspace.}"

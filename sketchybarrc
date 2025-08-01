@@ -75,6 +75,12 @@ sketchybar --add item workspace_trigger left \
                                    drawing=off \
            --subscribe workspace_trigger aerospace_refresh_workspaces
 
+# Periodic workspace sync to catch missed changes
+sketchybar --add item workspace_sync left \
+           --set workspace_sync script="$PLUGIN_DIR/workspace_sync.sh" \
+                                drawing=off \
+                                update_freq=1
+
 # Separator
 sketchybar --add item separator left \
            --set separator icon="󰇙" \
