@@ -17,23 +17,8 @@ get_spotify_info() {
     fi
 }
 
-# Function to get Apple Music info
-get_apple_music_info() {
-    local state=$(osascript -e 'tell application "Music" to player state as string' 2>/dev/null)
-    if [[ "$state" == "playing" ]]; then
-        local artist=$(osascript -e 'tell application "Music" to artist of current track as string' 2>/dev/null)
-        local track=$(osascript -e 'tell application "Music" to name of current track as string' 2>/dev/null)
-        echo "playing|$artist|$track"
-    elif [[ "$state" == "paused" ]]; then
-        echo "paused"
-    else
-        echo "stopped"
-    fi
-}
-
 # Check Spotify first, then Apple Music
 SPOTIFY_INFO=$(get_spotify_info)
-APPLE_MUSIC_INFO=$(get_apple_music_info)
 
 if [[ "$SPOTIFY_INFO" == "playing|"* ]]; then
     # Spotify is playing - show the item
@@ -46,18 +31,7 @@ if [[ "$SPOTIFY_INFO" == "playing|"* ]]; then
     else
         LABEL="$track"
     fi
-elif [[ "$APPLE_MUSIC_INFO" == "playing|"* ]]; then
-    # Apple Music is playing - show the item
-    sketchybar --set "$NAME" drawing=on
-    ICON="󰎆"
-    COLOR=$ACCENT_QUATERNARY
-    IFS='|' read -r state artist track <<< "$APPLE_MUSIC_INFO"
-    if [[ ${#track} -gt 20 ]]; then
-        LABEL="${track:0:20}..."
-    else
-        LABEL="$track"
-    fi
-elif [[ "$SPOTIFY_INFO" == "paused" ]] || [[ "$APPLE_MUSIC_INFO" == "paused" ]]; then
+elif [[ "$SPOTIFY_INFO" == "paused" ]]; then
     # Music is paused - show paused state
     sketchybar --set "$NAME" drawing=on
     ICON="󰏤"
