@@ -130,25 +130,60 @@ sketchybar --add item front_app left \
            --subscribe front_app front_app_switched
 
 ##### Right Side Items #####
+# Clock
+sketchybar --add item clock right \
+           --set clock icon="󰅐" \
+                       icon.font="SF Pro:Semibold:15.0" \
+                       icon.color=$YELLOW \
+                       icon.padding_left=8 \
+                       icon.padding_right=6 \
+                       label.font="SF Pro:Medium:12.0" \
+                       label.color=$WHITE \
+                       label.padding_left=4 \
+                       label.padding_right=8 \
+                       update_freq=10 \
+                       script="$PLUGIN_DIR/clock.sh" \
+                       background.color=$BACKGROUND_1 \
+                       background.drawing=on \
+                       padding_left=4 \
+                       padding_right=4 \
+                       click_script="$PLUGIN_DIR/clock_click.sh"
 
+# Battery
+sketchybar --add item battery right \
+            --set battery icon.font="SF Pro:Semibold:15.0" \
+                        icon.color=$ACCENT_SECONDARY \
+                        icon.padding_left=8 \
+                        icon.padding_right=6 \
+                        label.font="SF Pro:Medium:12.0" \
+                        label.color=$WHITE \
+                        label.padding_left=4 \
+                        label.padding_right=8 \
+                        update_freq=120 \
+                        script="$PLUGIN_DIR/battery.sh" \
+                        background.color=$BACKGROUND_1 \
+                        background.drawing=on \
+                        padding_left=4 \
+                        padding_right=4 \
+            --subscribe battery system_woke power_source_change
 
 
 # Calendar Events
-sketchybar --add item calendar right \
-           --set calendar icon.font="SF Pro:Semibold:12.0" \
-                          icon.padding_left=8 \
-                          icon.padding_right=6 \
-                          label.font="SF Pro:Medium:10.0" \
-                          label.padding_left=4 \
-                          label.padding_right=8 \
-                          label.max_chars=25 \
-                          update_freq=300 \
-                          script="$PLUGIN_DIR/calendar.sh" \
-                          background.color=$BACKGROUND_1 \
-                          background.drawing=on \
-                          background.height=26 \
-                          padding_left=4 \
-                          padding_right=4
+# sketchybar --add item calendar right \
+#            --set calendar icon.font="SF Pro:Semibold:12.0" \
+#                           icon.padding_left=8 \
+#                           icon.padding_right=6 \
+#                           label.font="SF Pro:Medium:10.0" \
+#                           label.padding_left=4 \
+#                           label.padding_right=8 \
+#                           label.max_chars=25 \
+#                           update_freq=300 \
+#                           script="$PLUGIN_DIR/calendar.sh" \
+#                           background.color=$BACKGROUND_1 \
+#                           background.drawing=on \
+#                           background.height=26 \
+#                           padding_left=4 \
+#                           padding_right=4
 
 # Now Playing
 sketchybar --add item now_playing right \
@@ -194,24 +229,7 @@ sketchybar --add item bluetooth right \
                           padding_left=4 \
                           padding_right=4
 
-# Clock
-sketchybar --add item clock right \
-           --set clock icon="󰅐" \
-                       icon.font="SF Pro:Semibold:15.0" \
-                       icon.color=$YELLOW \
-                       icon.padding_left=8 \
-                       icon.padding_right=6 \
-                       label.font="SF Pro:Medium:12.0" \
-                       label.color=$WHITE \
-                       label.padding_left=4 \
-                       label.padding_right=8 \
-                       update_freq=10 \
-                       script="$PLUGIN_DIR/clock.sh" \
-                       background.color=$BACKGROUND_1 \
-                       background.drawing=on \
-                       padding_left=4 \
-                       padding_right=4 \
-                       click_script="$PLUGIN_DIR/clock_click.sh"
+
 
 # Volume
 sketchybar --add item volume right \
@@ -233,37 +251,21 @@ sketchybar --add item volume right \
                         popup.horizontal=on \
            --subscribe volume volume_change
 
-# Battery
-sketchybar --add item battery right \
-           --set battery icon.font="SF Pro:Semibold:15.0" \
-                        icon.color=$ACCENT_SECONDARY \
-                        icon.padding_left=8 \
-                        icon.padding_right=6 \
-                        label.font="SF Pro:Medium:12.0" \
-                        label.color=$WHITE \
-                        label.padding_left=4 \
-                        label.padding_right=8 \
-                        update_freq=120 \
-                        script="$PLUGIN_DIR/battery.sh" \
-                        background.color=$BACKGROUND_1 \
-                        background.drawing=on \
-                        padding_left=4 \
-                        padding_right=4 \
-           --subscribe battery system_woke power_source_change
+
 
 # Pritunl VPN
-sketchybar --add item pritunl right \
-           --set pritunl icon="􀤆" \
-                        icon.font="SF Pro:Semibold:13.0" \
-                        icon.color=$ACCENT_PRIMARY \
-                        icon.padding_left=8 \
-                        icon.padding_right=10 \
-                        label.drawing=off \
-                        background.color=$BACKGROUND_1 \
-                        background.drawing=on \
-                        padding_left=4 \
-                        padding_right=4 \
-                        click_script="open -a Pritunl"
+# sketchybar --add item pritunl right \
+#            --set pritunl icon="􀤆" \
+#                         icon.font="SF Pro:Semibold:13.0" \
+#                         icon.color=$ACCENT_PRIMARY \
+#                         icon.padding_left=8 \
+#                         icon.padding_right=10 \
+#                         label.drawing=off \
+#                         background.color=$BACKGROUND_1 \
+#                         background.drawing=on \
+#                         padding_left=4 \
+#                         padding_right=4 \
+#                         click_script="open -a Pritunl"
 
 
 # Weather
@@ -284,4 +286,3 @@ sketchybar --add item pritunl right \
 
 ##### Finalize Setup #####
 sketchybar --update
-
