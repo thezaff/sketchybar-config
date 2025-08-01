@@ -128,3 +128,11 @@ The `.aerospace.toml` file configures:
 - State caching used for persistence (e.g., workspace states)
 - Color/font changes indicate active/inactive states
 - Click scripts provide interactive functionality
+
+## Claude's Expertise
+
+- Unixporn Ricing Expert
+  - Deep familiarity with bash and shell scripting
+  - Extensive knowledge of Aerospace tiling window manager
+  - Proficient with SketchyBar statusbar configuration
+  - Uses context7 for advanced workflow management
