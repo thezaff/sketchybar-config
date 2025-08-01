@@ -10,8 +10,8 @@ if [[ -z "$CONFIG_DIR" ]]; then
 fi
 source "$CONFIG_DIR/colors.sh"
 
-# Monitor-specific color functions using the rich color scheme
-get_monitor_color_focused() {
+# Monitor-specific color functions with sophisticated color scheme
+get_monitor_accent_color() {
     local monitor="$1"
     case "$monitor" in
         "1"|"main") echo "$ACCENT_PRIMARY" ;;      # Ultra Rich Blue for main monitor
@@ -22,45 +22,68 @@ get_monitor_color_focused() {
     esac
 }
 
-get_monitor_color_unfocused() {
+get_monitor_background_focused() {
     local monitor="$1"
-    local focused_color=$(get_monitor_color_focused "$monitor")
-    # Convert focused color to unfocused by changing alpha from ff to 55
-    echo "${focused_color/0xff/0x55}"
+    local accent_color=$(get_monitor_accent_color "$monitor")
+    # Create bright background by reducing alpha to 40 for focused state
+    echo "${accent_color/0xff/0x40}"
+}
+
+get_monitor_background_unfocused() {
+    local monitor="$1"
+    local accent_color=$(get_monitor_accent_color "$monitor")
+    # Create dimmed background by reducing alpha to 20 for unfocused state
+    echo "${accent_color/0xff/0x20}"
+}
+
+get_monitor_border_focused() {
+    local monitor="$1"
+    local accent_color=$(get_monitor_accent_color "$monitor")
+    # Create bright border by reducing alpha to 80 for focused state
+    echo "${accent_color/0xff/0x80}"
+}
+
+get_monitor_border_unfocused() {
+    local monitor="$1"
+    local accent_color=$(get_monitor_accent_color "$monitor")
+    # Create dimmed border by reducing alpha to 40 for unfocused state
+    echo "${accent_color/0xff/0x40}"
 }
 
 # Get current workspace and monitor information
 FOCUSED_WORKSPACE="$AEROSPACE_FOCUSED_WORKSPACE"
 PREV_WORKSPACE="$AEROSPACE_PREV_WORKSPACE"
 
-# Function to get monitor-specific color
-get_monitor_color() {
+# Function to get monitor-specific colors
+get_monitor_colors() {
     local workspace="$1"
     local is_focused="$2"
     
     # Get monitor info for this workspace using aerospace
     local monitor_info=$(aerospace list-workspaces --all --format '%{workspace}|%{monitor-id}|%{monitor-name}' | grep "^${workspace}|")
     
-    if [[ -z "$monitor_info" ]]; then
-        # Fallback color if we can't determine monitor
-        if [[ "$is_focused" == "true" ]]; then
-            echo "0xff007acc"
-        else
-            echo "0x55666666"
-        fi
-        return
+    local monitor_id="1"  # Default fallback
+    if [[ -n "$monitor_info" ]]; then
+        monitor_id=$(echo "$monitor_info" | cut -d'|' -f2)
     fi
     
-    local monitor_id=$(echo "$monitor_info" | cut -d'|' -f2)
-    local monitor_name=$(echo "$monitor_info" | cut -d'|' -f3 | tr '[:upper:]' '[:lower:]')
+    # Get accent color for text
+    local accent_color=$(get_monitor_accent_color "$monitor_id")
     
-    # Determine color based on monitor and focus state
+    # Get background and border colors based on focus state
+    local background_color
+    local border_color
+    
     if [[ "$is_focused" == "true" ]]; then
-        # Try monitor ID first, then name
-        get_monitor_color_focused "$monitor_id"
+        background_color=$(get_monitor_background_focused "$monitor_id")
+        border_color=$(get_monitor_border_focused "$monitor_id")
     else
-        get_monitor_color_unfocused "$monitor_id"
+        background_color=$(get_monitor_background_unfocused "$monitor_id")
+        border_color=$(get_monitor_border_unfocused "$monitor_id")
     fi
+    
+    # Return colors as space-separated string: accent background border
+    echo "$accent_color $background_color $border_color"
 }
 
 
@@ -70,44 +93,42 @@ update_workspace_item() {
     local is_focused="$2"
     
     local item_name="aerospace.${workspace}"
-    local color=$(get_monitor_color "$workspace" "$is_focused")
     
-    # Set icon color based on focus state for better contrast
-    local icon_color="$WHITE"
-    if [[ "$is_focused" == "true" ]]; then
-        icon_color="$WHITE"  # Bright white for focused
-    else
-        icon_color="$LIGHT_GREY"  # Slightly dimmed for unfocused
-    fi
+    # Get the sophisticated color scheme
+    local colors=$(get_monitor_colors "$workspace" "$is_focused")
+    local accent_color=$(echo "$colors" | cut -d' ' -f1)
+    local background_color=$(echo "$colors" | cut -d' ' -f2)
+    local border_color=$(echo "$colors" | cut -d' ' -f3)
     
     # Check if item exists
     local item_exists=$(sketchybar --query "$item_name" 2>/dev/null)
     
     if [[ -z "$item_exists" ]]; then
-        # Create new workspace item with refined styling
+        # Create new workspace item with sophisticated color scheme
         sketchybar --add item "$item_name" left \
                    --set "$item_name" \
                          icon="$workspace" \
-                         icon.font="SF Pro:Bold:12.0" \
-                         icon.color="$icon_color" \
+                         icon.font="JetbrainsMono Nerd Font Mono:Bold:13.0" \
+                         icon.color="$accent_color" \
                          icon.padding_left=6 \
                          icon.padding_right=6 \
                          label.drawing=off \
-                         background.color="$color" \
-                         background.corner_radius=8 \
-                         background.height=22 \
+                         background.color="$background_color" \
+                         background.corner_radius=6 \
+                         background.height=26 \
                          background.border_width=1 \
-                         background.border_color="$BACKGROUND_2" \
+                         background.border_color="$border_color" \
                          background.drawing=on \
-                         padding_left=3 \
-                         padding_right=3 \
+                         padding_left=8 \
+                         padding_right=8 \
                          click_script="aerospace workspace $workspace" \
                    --subscribe "$item_name" aerospace_workspace_change
     else
-        # Update existing workspace item
+        # Update existing workspace item with new colors
         sketchybar --set "$item_name" \
-                         background.color="$color" \
-                         icon.color="$icon_color" \
+                         icon.color="$accent_color" \
+                         background.color="$background_color" \
+                         background.border_color="$border_color" \
                          icon="$workspace"
     fi
 }
